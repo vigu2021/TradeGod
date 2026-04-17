@@ -6,15 +6,13 @@ from sqlalchemy.orm import DeclarativeBase
 from .settings import get_settings
 
 engine = create_async_engine(get_settings().database_url)
-async_session = async_sessionmaker(engine, expire_on_commit=False)
+async_session = async_sessionmaker(engine, expire_on_commit=False, pool_pre_ping=True)
 
 
-# All SQLAlchemy models inherit from this to share metadata and table registry
 class Base(DeclarativeBase):
     pass
 
 
-# FastAPI dependency — use with Depends(get_db)
 async def get_db() -> AsyncGenerator[AsyncSession]:
     async with async_session() as session:
         yield session

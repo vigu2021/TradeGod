@@ -8,9 +8,24 @@ class Environment(StrEnum):
     PROD = "prod"
 
 
+class LogLevel(StrEnum):
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    CRITICAL = "CRITICAL"
+
+
+class LogFormat(StrEnum):
+    JSON = "json"
+    CONSOLE = "console"
+
+
 class Settings(BaseSettings):
-    environment: StrEnum = Environment.DEV
+    environment: Environment = Environment.DEV
     port: int = 6400
+    log_level: LogLevel = LogLevel.INFO
+    log_format: LogFormat = LogFormat.CONSOLE
 
     postgres_user: str
     postgres_password: str
