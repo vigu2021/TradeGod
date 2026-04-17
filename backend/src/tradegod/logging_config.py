@@ -12,9 +12,7 @@ def setup_logging() -> None:
 
     # Log processors json or regular console text
     log_processor: Processor = (
-        structlog.processors.JSONRenderer()
-        if log_format == LogFormat.JSON
-        else structlog.dev.ConsoleRenderer(colors=True)
+        structlog.processors.JSONRenderer() if log_format == LogFormat.JSON else structlog.dev.ConsoleRenderer(colors=True)
     )
 
     # Enrichment adds the following elements to every log_event
@@ -29,9 +27,7 @@ def setup_logging() -> None:
 
     # Configure logger with handler and formatter
     handler = logging.StreamHandler(sys.stdout)
-    formatter = structlog.stdlib.ProcessorFormatter(
-        processor=log_processor, foreign_pre_chain=shared_processors
-    )
+    formatter = structlog.stdlib.ProcessorFormatter(processor=log_processor, foreign_pre_chain=shared_processors)
     handler.setFormatter(formatter)
 
     # Configure root logger
@@ -42,8 +38,7 @@ def setup_logging() -> None:
 
     # Configure structlog to route through stdlib
     structlog.configure(
-        processors=shared_processors
-        + [structlog.stdlib.ProcessorFormatter.wrap_for_formatter],
+        processors=shared_processors + [structlog.stdlib.ProcessorFormatter.wrap_for_formatter],
         wrapper_class=structlog.stdlib.BoundLogger,
         logger_factory=structlog.stdlib.LoggerFactory(),
         cache_logger_on_first_use=True,
