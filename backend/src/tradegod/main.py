@@ -40,6 +40,12 @@ async def app_error_handler(_request: Request, exc: AppError) -> JSONResponse:
 
 @app.exception_handler(RequestValidationError)
 async def request_validation_exception_handler(_request: Request, exc: RequestValidationError) -> JSONResponse:
+    """Translate Pydantic validation failures into safe 422 responses.
+
+    In non-dev environments, strips the `input` field from each error so
+    raw submitted values (e.g. passwords) never leak back to the client.
+    In dev, the full detail is returned to aid debugging.
+    """
     exclude: set[str] = set() if get_settings().environment == Environment.DEV else {"input"}
     return JSONResponse(
         status_code=HTTP_422_UNPROCESSABLE_CONTENT,

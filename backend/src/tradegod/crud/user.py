@@ -17,6 +17,14 @@ async def get_user_email(db: AsyncSession, email: str) -> User | None:
 
 
 async def create_user(db: AsyncSession, username: str, email: str, hashed_password: str) -> User:
+    """Insert a new user and flush so uniqueness constraints fire immediately.
+
+    The caller is responsible for committing. On constraint violation the
+    transaction is rolled back before the domain exception propagates.
+
+    Raises:
+        AlreadyExists: if username or email already exists in the database.
+    """
     user = User(username=username, email=email, hashed_password=hashed_password)
     db.add(user)
     try:
