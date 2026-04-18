@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
-from tradegod.database import Base
-from tradegod.settings import get_settings
+from tradegod.core.database import Base
+from tradegod.core.settings import get_settings
 from tradegod import models  # noqa: F401  # ensure all models register on Base.metadata
 
 config = context.config

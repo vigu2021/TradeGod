@@ -1,7 +1,7 @@
 from sqlalchemy import DateTime, String, func
 from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column
-from tradegod.database import Base
+from tradegod.core.database import Base
 
 
 class User(Base):
