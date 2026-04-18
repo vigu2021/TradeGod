@@ -1,6 +1,7 @@
 # Configure logging before any other imports so that import-time logs
 # (e.g. SQLAlchemy engine setup) flow through the configured pipeline.
 from tradegod.core.logging_config import setup_logging
+from tradegod.routes.users import users_router
 
 setup_logging()
 
@@ -25,6 +26,7 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.include_router(users_router)
 
 
 @app.exception_handler(AppError)

@@ -1,4 +1,3 @@
-from collections.abc import AsyncGenerator
 from typing import ClassVar, Final
 
 from sqlalchemy import MetaData
@@ -15,14 +14,9 @@ NAMING_CONVENTION: Final[dict[str, str]] = {
     "pk": "pk_%(table_name)s",
 }
 
-engine: Final[AsyncEngine] = create_async_engine(get_settings().database_url)
-async_session: Final[async_sessionmaker[AsyncSession]] = async_sessionmaker(engine, expire_on_commit=False, pool_pre_ping=True)
+engine: Final[AsyncEngine] = create_async_engine(get_settings().database_url, pool_pre_ping=True)
+async_session: Final[async_sessionmaker[AsyncSession]] = async_sessionmaker(engine, expire_on_commit=False)
 
 
 class Base(DeclarativeBase):
     metadata: ClassVar[MetaData] = MetaData(naming_convention=NAMING_CONVENTION)
-
-
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with async_session() as session:
-        yield session
