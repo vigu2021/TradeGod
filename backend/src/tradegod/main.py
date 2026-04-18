@@ -6,14 +6,18 @@ from tradegod.routes.users import users_router
 setup_logging()
 
 from contextlib import asynccontextmanager
-from sqlalchemy import text
+
 import uvicorn
 from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
+from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
 
 from tradegod.core.database import engine
 from tradegod.core.exceptions import AppError
-from tradegod.core.settings import get_settings
+from tradegod.core.settings import Environment, get_settings
 
 
 @asynccontextmanager
@@ -32,6 +36,15 @@ app.include_router(users_router)
 @app.exception_handler(AppError)
 async def app_error_handler(_request: Request, exc: AppError) -> JSONResponse:
     return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_exception_handler(_request: Request, exc: RequestValidationError) -> JSONResponse:
+    exclude: set[str] = set() if get_settings().environment == Environment.DEV else {"input"}
+    return JSONResponse(
+        status_code=HTTP_422_UNPROCESSABLE_CONTENT,
+        content={"detail": jsonable_encoder(exc.errors(), exclude=exclude)},
+    )
 
 
 @app.get("/")
