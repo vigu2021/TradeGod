@@ -1,6 +1,7 @@
 # Configure logging before any other imports so that import-time logs
 # (e.g. SQLAlchemy engine setup) flow through the configured pipeline.
 from tradegod.core.logging_config import setup_logging
+from tradegod.middlewares.request_logging import RequestLoggingMiddleware
 from tradegod.routes.users import users_router
 
 setup_logging()
@@ -30,9 +31,16 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+# Middlewares
+app.add_middleware(RequestLoggingMiddleware)
+
+
+# Routers
 app.include_router(users_router)
 
 
+# Errors
 @app.exception_handler(AppError)
 async def app_error_handler(_request: Request, exc: AppError) -> JSONResponse:
     return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
