@@ -9,7 +9,12 @@ from tradegod.core.database import async_session
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with async_session() as session:
-        yield session
+        try:
+            yield session
+            await session.commit()
+        except Exception:
+            await session.rollback()
+            raise
 
 
-DbSession = Annotated[AsyncSession, Depends(get_db)]
+DbSession = Annotated[AsyncSession, Depends(get_db, scope="function")]

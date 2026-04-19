@@ -19,8 +19,7 @@ async def get_user_email(db: AsyncSession, email: str) -> User | None:
 async def create_user(db: AsyncSession, username: str, email: str, hashed_password: str) -> User:
     """Insert a new user and flush so uniqueness constraints fire immediately.
 
-    The caller is responsible for committing. On constraint violation the
-    transaction is rolled back before the domain exception propagates.
+    Transaction lifecycle (commit/rollback) is owned by the session dependency.
 
     Raises:
         AlreadyExists: if username or email already exists in the database.
@@ -30,6 +29,5 @@ async def create_user(db: AsyncSession, username: str, email: str, hashed_passwo
     try:
         await db.flush()
     except IntegrityError:
-        await db.rollback()
         raise AlreadyExists("This username or email already exists")
     return user

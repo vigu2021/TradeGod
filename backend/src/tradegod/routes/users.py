@@ -26,5 +26,4 @@ async def register(db: DbSession, payload: UserCreate) -> User:
         email=payload.email,
         raw_password=payload.password.get_secret_value(),
     )
-    await db.commit()
     return user
