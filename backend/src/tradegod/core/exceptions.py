@@ -27,3 +27,13 @@ class AlreadyExists(AppError):
 class InvalidCredentials(AppError):
     status_code: int = 401
     detail: str = "Invalid credentials"
+
+
+class TokenExpired(AppError):
+    status_code: int = 401
+    detail: str = "Token expired"
+
+
+class InvalidToken(AppError):
+    status_code: int = 401
+    detail: str = "Invalid token"
