@@ -1,3 +1,4 @@
+from typing import Final
 from fastapi import APIRouter, Response
 
 from tradegod.core.dependencies import DbSession
@@ -9,7 +10,7 @@ from tradegod.services.auth import register_account
 auth_router = APIRouter(prefix="/auth")
 
 
-REFRESH_COOKIE_NAME = "refresh_token"
+REFRESH_COOKIE_NAME: Final[str] = "refresh_token"
 
 
 def set_refresh_cookie(response: Response, raw_refresh_token: str) -> None:

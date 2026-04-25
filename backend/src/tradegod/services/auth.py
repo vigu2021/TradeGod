@@ -18,7 +18,7 @@ from tradegod.models import User
 @dataclass(frozen=True)
 class IssuedTokens:
     access_token: str
-    refresh_token: str  # raw value — goes into HttpOnly cookie
+    refresh_token: str
 
 
 @dataclass(frozen=True)
@@ -29,6 +29,7 @@ class RegisterResult:
 
 async def _issue_tokens(db: AsyncSession, user_id: int) -> IssuedTokens:
     """Mint an access token and persist a new refresh token row."""
+    access_token = generate_access_token(user_id)
     raw_refresh_token = generate_refresh_token()
     expires_at = datetime.now(UTC) + timedelta(days=get_settings().refresh_token_expire_days)
 
@@ -40,7 +41,7 @@ async def _issue_tokens(db: AsyncSession, user_id: int) -> IssuedTokens:
     )
 
     return IssuedTokens(
-        access_token=generate_access_token(user_id),
+        access_token=access_token,
         refresh_token=raw_refresh_token,
     )
 
