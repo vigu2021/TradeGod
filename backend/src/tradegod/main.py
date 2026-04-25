@@ -1,7 +1,7 @@
 # Configure logging before any other imports so that import-time logs
 # (e.g. SQLAlchemy engine setup) flow through the configured pipeline.
 from tradegod.core.logging_config import setup_logging
-from tradegod.middlewares.request_logging import RequestLoggingMiddleware
+from tradegod.core.middlewares.request_logging import RequestLoggingMiddleware
 from tradegod.routes.users import users_router
 
 setup_logging()
