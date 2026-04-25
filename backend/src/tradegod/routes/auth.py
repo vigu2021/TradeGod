@@ -1,11 +1,13 @@
-from typing import Final
-from fastapi import APIRouter, Response
+from typing import Annotated, Final
+
+from fastapi import APIRouter, Cookie, Response
 
 from tradegod.core.dependencies import DbSession
+from tradegod.core.exceptions import InvalidCredentials
 from tradegod.core.settings import get_settings
 from tradegod.schemas.auth import AccessToken, AuthResponse, LoginRequest, RegisterRequest
 from tradegod.schemas.user import UserPublic
-from tradegod.services.auth import login_account, register_account
+from tradegod.services.auth import login_account, refresh_account, register_account
 
 auth_router = APIRouter(prefix="/auth")
 
@@ -63,8 +65,19 @@ async def login(db: DbSession, payload: LoginRequest, response: Response) -> Aut
 
 
 @auth_router.post("/refresh")
-async def refresh(db: DbSession, payload: LoginRequest, response: Response) -> AuthResponse:
-    result = await login_account(db, email=payload.email, raw_password=payload.password.get_secret_value())
+async def refresh(
+    db: DbSession,
+    response: Response,
+    refresh_token: Annotated[str | None, Cookie(alias=REFRESH_COOKIE_NAME)] = None,
+) -> AuthResponse:
+    """Validate the refresh-token cookie, rotate it, and return a new access token.
+
+    Raises:
+        InvalidCredentials (401): cookie missing, or token unknown, revoked, or expired.
+    """
+    if not refresh_token:
+        raise InvalidCredentials
+    result = await refresh_account(db, raw_refresh_token=refresh_token)
     set_refresh_cookie(response, result.tokens.refresh_token)
     return AuthResponse(
         user=UserPublic.model_validate(result.user),
