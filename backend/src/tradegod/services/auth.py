@@ -13,7 +13,7 @@ from tradegod.core.security import (
 )
 from tradegod.core.settings import get_settings
 from tradegod.crud.refresh_token import create_refresh_token
-from tradegod.crud.user import create_user, get_user_by_username
+from tradegod.crud.user import create_user, get_user_by_email
 from tradegod.models import User
 
 
@@ -47,13 +47,13 @@ async def register_account(db: AsyncSession, username: str, email: str, raw_pass
     return RegisterResult(user=user, tokens=tokens)
 
 
-async def login_account(db: AsyncSession, username: str, raw_password: str) -> LoginResult:
-    """Login a exisiting user and issue a token pair
+async def login_account(db: AsyncSession, email: str, raw_password: str) -> LoginResult:
+    """Authenticate by email + password and issue a token pair.
 
     Raises:
-
+        InvalidCredentials: email not found or password mismatch.
     """
-    user = await get_user_by_username(db, username)
+    user = await get_user_by_email(db, email)
 
     if not user or not await verify_password(raw_password, user.hashed_password):
         raise InvalidCredentials

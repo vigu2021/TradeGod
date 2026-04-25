@@ -3,9 +3,9 @@ from fastapi import APIRouter, Response
 
 from tradegod.core.dependencies import DbSession
 from tradegod.core.settings import get_settings
-from tradegod.schemas.auth import AccessToken, AuthResponse, RegisterRequest
+from tradegod.schemas.auth import AccessToken, AuthResponse, LoginRequest, RegisterRequest
 from tradegod.schemas.user import UserPublic
-from tradegod.services.auth import register_account
+from tradegod.services.auth import login_account, register_account
 
 auth_router = APIRouter(prefix="/auth")
 
@@ -45,6 +45,16 @@ async def register(
         email=payload.email,
         raw_password=payload.password.get_secret_value(),
     )
+    set_refresh_cookie(response, result.tokens.refresh_token)
+    return AuthResponse(
+        user=UserPublic.model_validate(result.user),
+        tokens=AccessToken(access_token=result.tokens.access_token),
+    )
+
+
+@auth_router.post("/login")
+async def login(db: DbSession, payload: LoginRequest, response: Response) -> AuthResponse:
+    result = await login_account(db, email=payload.email, raw_password=payload.password.get_secret_value())
     set_refresh_cookie(response, result.tokens.refresh_token)
     return AuthResponse(
         user=UserPublic.model_validate(result.user),
