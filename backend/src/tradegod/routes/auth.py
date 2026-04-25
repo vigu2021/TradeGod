@@ -60,3 +60,13 @@ async def login(db: DbSession, payload: LoginRequest, response: Response) -> Aut
         user=UserPublic.model_validate(result.user),
         tokens=AccessToken(access_token=result.tokens.access_token),
     )
+
+
+@auth_router.post("/refresh")
+async def refresh(db: DbSession, payload: LoginRequest, response: Response) -> AuthResponse:
+    result = await login_account(db, email=payload.email, raw_password=payload.password.get_secret_value())
+    set_refresh_cookie(response, result.tokens.refresh_token)
+    return AuthResponse(
+        user=UserPublic.model_validate(result.user),
+        tokens=AccessToken(access_token=result.tokens.access_token),
+    )

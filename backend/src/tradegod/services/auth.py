@@ -12,7 +12,7 @@ from tradegod.core.security import (
     verify_password,
 )
 from tradegod.core.settings import get_settings
-from tradegod.crud.refresh_token import create_refresh_token
+from tradegod.crud.refresh_token import create_refresh_token, get_refresh_token_with_user_by_token_hash
 from tradegod.crud.user import create_user, get_user_by_email
 from tradegod.models import User
 
@@ -35,11 +35,20 @@ class LoginResult:
     tokens: IssuedTokens
 
 
+@dataclass(frozen=True, slots=True)
+class RefreshResult:
+    user: User
+    tokens: IssuedTokens
+
+
 async def register_account(db: AsyncSession, username: str, email: str, raw_password: str) -> RegisterResult:
     """Register a new user and issue an initial token pair.
 
+    The password is hashed with argon2 before being persisted. On success the
+    caller receives the new user along with a fresh access + refresh token pair.
+
     Raises:
-        AlreadyExists: if the username or email is already taken.
+        AlreadyExists: username or email is already taken.
     """
     hashed_password = await hash_password(raw_password)
     user = await create_user(db, username, email, hashed_password)
@@ -49,6 +58,10 @@ async def register_account(db: AsyncSession, username: str, email: str, raw_pass
 
 async def login_account(db: AsyncSession, email: str, raw_password: str) -> LoginResult:
     """Authenticate by email + password and issue a token pair.
+
+    A single error is raised whether the email is unknown or the password
+    is wrong, so callers cannot distinguish the two failure modes (avoids
+    account-enumeration leaks).
 
     Raises:
         InvalidCredentials: email not found or password mismatch.
@@ -62,8 +75,38 @@ async def login_account(db: AsyncSession, email: str, raw_password: str) -> Logi
     return LoginResult(user=user, tokens=tokens)
 
 
+async def refresh_account(db: AsyncSession, raw_refresh_token: str) -> RefreshResult:
+    """Validate a refresh token and issue a new token pair.
+
+    The supplied token is looked up by its sha256 hash. A single error is
+    raised whether the row is missing, revoked, or expired, so callers
+    cannot probe to discover which condition failed.
+
+    Raises:
+        InvalidCredentials: token not found, revoked, or expired.
+    """
+    hashed_refresh_token = hash_refresh_token(raw_refresh_token)
+    refresh_token = await get_refresh_token_with_user_by_token_hash(db, hashed_refresh_token)
+
+    now = datetime.now(UTC)
+    if not refresh_token or refresh_token.revoked_at is not None or refresh_token.expires_at < now:
+        raise InvalidCredentials
+
+    # Each refresh token works only once. If we see this one again, that's a sign it was stolen.
+    refresh_token.revoked_at = now
+
+    tokens = await _issue_tokens(db, refresh_token.user_id)
+    return RefreshResult(user=refresh_token.user, tokens=tokens)
+
+
 async def _issue_tokens(db: AsyncSession, user_id: int) -> IssuedTokens:
-    """Mint an access token and persist a new refresh token row."""
+    """Mint an access token and persist a new refresh token row.
+
+    The access token is a signed JWT (returned to the client). The refresh
+    token is a random opaque string; only its sha256 hash is persisted, so a
+    DB leak does not expose usable tokens. The raw refresh token is returned
+    so callers can deliver it to the client (typically via HttpOnly cookie).
+    """
     access_token = generate_access_token(user_id)
     raw_refresh_token = generate_refresh_token()
     expires_at = datetime.now(UTC) + timedelta(days=get_settings().refresh_token_expire_days)
