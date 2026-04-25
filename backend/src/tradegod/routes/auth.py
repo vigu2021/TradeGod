@@ -4,7 +4,7 @@ from fastapi import APIRouter, Cookie, Response
 
 from tradegod.core.dependencies import DbSession
 from tradegod.core.exceptions import InvalidCredentials
-from tradegod.core.settings import get_settings
+from tradegod.core.settings import Environment, get_settings
 from tradegod.schemas.auth import AccessToken, AuthResponse, LoginRequest, RegisterRequest
 from tradegod.schemas.user import UserPublic
 from tradegod.services.auth import login_account, refresh_account, register_account
@@ -22,8 +22,8 @@ def set_refresh_cookie(response: Response, raw_refresh_token: str) -> None:
         value=raw_refresh_token,
         max_age=get_settings().refresh_token_expire_days * 86400,
         httponly=True,
-        secure=True,
-        samesite="strict",
+        secure=get_settings().environment != Environment.DEV,
+        samesite="lax",
         path="/auth",
     )
 
@@ -56,6 +56,13 @@ async def register(
 
 @auth_router.post("/login")
 async def login(db: DbSession, payload: LoginRequest, response: Response) -> AuthResponse:
+    """Authenticate by email + password, set the refresh-token cookie, and return the access token.
+
+    Raises:
+        InvalidCredentials (401): email not found or password mismatch.
+        RequestValidationError (422): on schema validation failure
+            (invalid email format, missing fields).
+    """
     result = await login_account(db, email=payload.email, raw_password=payload.password.get_secret_value())
     set_refresh_cookie(response, result.tokens.refresh_token)
     return AuthResponse(
