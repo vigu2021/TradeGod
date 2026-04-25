@@ -2,14 +2,14 @@ from fastapi import APIRouter
 
 from tradegod.core.dependencies import DbSession
 from tradegod.models.user import User
-from tradegod.schemas.user import UserCreate, UserResponse
-from tradegod.services.user import register_user
+from tradegod.schemas.auth import RegisterRequest, RegisterResponse
+from tradegod.services.auth import register_user
 
-users_router = APIRouter(prefix="/users")
+auth_router = APIRouter(prefix="/auth")
 
 
-@users_router.post("/register", response_model=UserResponse, status_code=201)
-async def register(db: DbSession, payload: UserCreate) -> User:
+@auth_router.post("/register", response_model=RegisterResponse, status_code=201)
+async def register(db: DbSession, payload: RegisterRequest) -> User:
     """Register a new user account.
 
     Creates a user with the given username, email, and password. The password

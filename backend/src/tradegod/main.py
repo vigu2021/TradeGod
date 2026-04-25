@@ -2,7 +2,7 @@
 # (e.g. SQLAlchemy engine setup) flow through the configured pipeline.
 from tradegod.core.logging_config import setup_logging
 from tradegod.core.middlewares.request_logging import RequestLoggingMiddleware
-from tradegod.routes.users import users_router
+from tradegod.routes.auth import auth_router
 
 setup_logging()
 
@@ -37,7 +37,7 @@ app.add_middleware(RequestLoggingMiddleware)
 
 
 # Routers
-app.include_router(users_router)
+app.include_router(auth_router)
 
 
 # Errors

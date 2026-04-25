@@ -5,13 +5,13 @@ from pydantic import EmailStr, Field, SecretStr
 from tradegod.schemas.base import PublicModel
 
 
-class UserCreate(PublicModel):
+class RegisterRequest(PublicModel):
     username: str = Field(min_length=3, max_length=30, pattern=r"^[a-zA-Z0-9_]+$")
     email: EmailStr
     password: SecretStr = Field(min_length=8, max_length=128)
 
 
-class UserResponse(PublicModel):
+class RegisterResponse(PublicModel):
     id: int
     username: str
     email: EmailStr
