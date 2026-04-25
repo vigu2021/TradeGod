@@ -9,17 +9,17 @@ from jwt import ExpiredSignatureError, InvalidTokenError
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from pydantic import SecretStr
 from tradegod.core.exceptions import InvalidToken, TokenExpired
 from tradegod.core.settings import get_settings
 
-SECRET_KEY: Final[SecretStr] = get_settings().jwt_secret
 ALGORITHM: Final[str] = "HS256"
+
 _ph: Final[PasswordHasher] = PasswordHasher()
 
 
 class AccessTokenPayload(TypedDict):
     sub: str
+    iat: int
     exp: int
     type: Literal["access"]
 
@@ -49,10 +49,16 @@ def hash_refresh_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
-def create_access_token(user_id: int) -> str:
-    expires_at = datetime.now(UTC) + timedelta(minutes=30)
-    payload: AccessTokenPayload = {"sub": str(user_id), "exp": int(expires_at.timestamp()), "type": "access"}
-    return jwt.encode(payload, SECRET_KEY.get_secret_value(), algorithm=ALGORITHM)  # pyright: ignore[reportArgumentType]
+def generate_access_token(user_id: int) -> str:
+    now = datetime.now(UTC)
+    expires_at = now + timedelta(minutes=get_settings().access_token_expire_minutes)
+    payload: AccessTokenPayload = {
+        "sub": str(user_id),
+        "iat": int(now.timestamp()),
+        "exp": int(expires_at.timestamp()),
+        "type": "access",
+    }
+    return jwt.encode(payload, get_settings().jwt_secret.get_secret_value(), algorithm=ALGORITHM)  # pyright: ignore[reportArgumentType]
 
 
 def decode_access_token(token: str) -> AccessTokenPayload:
@@ -63,7 +69,7 @@ def decode_access_token(token: str) -> AccessTokenPayload:
         the `type` claim is not "access".
     """
     try:
-        payload = jwt.decode(token, SECRET_KEY.get_secret_value(), algorithms=[ALGORITHM])
+        payload = jwt.decode(token, get_settings().jwt_secret.get_secret_value(), algorithms=[ALGORITHM])
     except ExpiredSignatureError as e:
         raise TokenExpired from e
     except InvalidTokenError as e:

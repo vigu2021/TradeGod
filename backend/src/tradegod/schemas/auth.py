@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from pydantic import EmailStr, Field, SecretStr
 
 from tradegod.schemas.base import PublicModel
+from tradegod.schemas.user import UserPublic
 
 
 class RegisterRequest(PublicModel):
@@ -11,8 +10,16 @@ class RegisterRequest(PublicModel):
     password: SecretStr = Field(min_length=8, max_length=128)
 
 
-class RegisterResponse(PublicModel):
-    id: int
-    username: str
+class LoginRequest(PublicModel):
     email: EmailStr
-    created_at: datetime
+    password: SecretStr
+
+
+class AccessToken(PublicModel):
+    access_token: str
+    token_type: str = "bearer"
+
+
+class AuthResponse(PublicModel):
+    user: UserPublic
+    tokens: AccessToken

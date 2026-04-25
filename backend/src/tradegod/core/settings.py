@@ -25,9 +25,14 @@ class LogFormat(StrEnum):
 class Settings(BaseSettings):
     environment: Environment = Environment.DEV
     port: int = 6400
+
     log_level: LogLevel = LogLevel.INFO
     log_format: LogFormat = LogFormat.CONSOLE
+
     jwt_secret: SecretStr
+    access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 7
+
     postgres_user: str
     postgres_password: str
     postgres_db: str

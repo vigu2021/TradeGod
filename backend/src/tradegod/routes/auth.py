@@ -1,29 +1,51 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 
 from tradegod.core.dependencies import DbSession
-from tradegod.models.user import User
-from tradegod.schemas.auth import RegisterRequest, RegisterResponse
-from tradegod.services.auth import register_user
+from tradegod.core.settings import get_settings
+from tradegod.schemas.auth import AccessToken, AuthResponse, RegisterRequest
+from tradegod.schemas.user import UserPublic
+from tradegod.services.auth import register_account
 
 auth_router = APIRouter(prefix="/auth")
 
 
-@auth_router.post("/register", response_model=RegisterResponse, status_code=201)
-async def register(db: DbSession, payload: RegisterRequest) -> User:
-    """Register a new user account.
+REFRESH_COOKIE_NAME = "refresh_token"
 
-    Creates a user with the given username, email, and password. The password
-    is hashed with argon2 before being stored.
+
+def set_refresh_cookie(response: Response, raw_refresh_token: str) -> None:
+    """Attach the refresh token as an HttpOnly cookie scoped to /auth."""
+    response.set_cookie(
+        key=REFRESH_COOKIE_NAME,
+        value=raw_refresh_token,
+        max_age=get_settings().refresh_token_expire_days * 86400,
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        path="/auth",
+    )
+
+
+@auth_router.post("/register", status_code=201)
+async def register(
+    db: DbSession,
+    payload: RegisterRequest,
+    response: Response,
+) -> AuthResponse:
+    """Register a new user account, set the refresh-token cookie, and return the access token.
 
     Raises:
         AlreadyExists (409): if the username or email is already taken.
         RequestValidationError (422): on schema validation failure
             (length, format, or missing fields).
     """
-    user = await register_user(
+    result = await register_account(
         db,
         username=payload.username,
         email=payload.email,
         raw_password=payload.password.get_secret_value(),
     )
-    return user
+    set_refresh_cookie(response, result.tokens.refresh_token)
+    return AuthResponse(
+        user=UserPublic.model_validate(result.user),
+        tokens=AccessToken(access_token=result.tokens.access_token),
+    )
