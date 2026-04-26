@@ -9,3 +9,9 @@ export type AuthResponse = {
   user: User;
   tokens: AccessToken;
 };
+
+export type RegisterRequest = {
+    username: string,
+    email: string,
+    password: string,
+}
