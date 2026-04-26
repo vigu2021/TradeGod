@@ -7,7 +7,7 @@ from tradegod.core.exceptions import InvalidCredentials
 from tradegod.core.settings import Environment, get_settings
 from tradegod.schemas.auth import AccessToken, AuthResponse, LoginRequest, RegisterRequest
 from tradegod.schemas.user import UserPublic
-from tradegod.services.auth import login_account, refresh_account, register_account
+from tradegod.services.auth import login_account, logout_account, refresh_account, register_account
 
 auth_router = APIRouter(prefix="/auth")
 
@@ -21,6 +21,17 @@ def set_refresh_cookie(response: Response, raw_refresh_token: str) -> None:
         key=REFRESH_COOKIE_NAME,
         value=raw_refresh_token,
         max_age=get_settings().refresh_token_expire_days * 86400,
+        httponly=True,
+        secure=get_settings().environment != Environment.DEV,
+        samesite="lax",
+        path="/auth",
+    )
+
+
+def delete_refresh_cookie(response: Response) -> None:
+    """Clear the refresh-token cookie. Attributes must mirror set_refresh_cookie so the browser matches and removes it."""
+    response.delete_cookie(
+        key=REFRESH_COOKIE_NAME,
         httponly=True,
         secure=get_settings().environment != Environment.DEV,
         samesite="lax",
@@ -90,3 +101,21 @@ async def refresh(
         user=UserPublic.model_validate(result.user),
         tokens=AccessToken(access_token=result.tokens.access_token),
     )
+
+
+@auth_router.post("/logout", status_code=204)
+async def logout(
+    db: DbSession,
+    response: Response,
+    refresh_token: Annotated[str | None, Cookie(alias=REFRESH_COOKIE_NAME)] = None,
+) -> None:
+    """Revoke the refresh-token cookie's session and clear it from the browser.
+
+    Idempotent: always returns 204, whether the cookie was present, missing,
+    pointed at an unknown token, or already revoked. The access token is not
+    revoked (JWTs are stateless) and remains valid until its exp claim, so
+    clients should also drop their in-memory copy on logout.
+    """
+    if refresh_token:
+        await logout_account(db, refresh_token)
+    delete_refresh_cookie(response)
