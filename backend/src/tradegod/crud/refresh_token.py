@@ -19,6 +19,12 @@ async def create_refresh_token(
     return refresh_token
 
 
+async def get_refresh_token_by_token_hash(db: AsyncSession, token_hash: str) -> RefreshToken | None:
+    stmt = select(RefreshToken).where(RefreshToken.token_hash == token_hash)
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
+
+
 async def get_refresh_token_with_user_by_token_hash(db: AsyncSession, token_hash: str) -> RefreshToken | None:
     stmt = select(RefreshToken).options(joinedload(RefreshToken.user)).where(RefreshToken.token_hash == token_hash)
     result = await db.execute(stmt)

@@ -14,7 +14,7 @@ from tradegod.core.security import (
     verify_password,
 )
 from tradegod.core.settings import get_settings
-from tradegod.crud.refresh_token import create_refresh_token, get_refresh_token_with_user_by_token_hash
+from tradegod.crud.refresh_token import create_refresh_token, get_refresh_token_by_token_hash, get_refresh_token_with_user_by_token_hash
 from tradegod.crud.user import create_user, get_user_by_email
 from tradegod.models import User
 
@@ -116,6 +116,20 @@ async def refresh_account(db: AsyncSession, raw_refresh_token: str) -> RefreshRe
     tokens = await _issue_tokens(db, refresh_token.user_id)
     logger.info("auth.refresh.success", user_id=refresh_token.user_id)
     return RefreshResult(user=refresh_token.user, tokens=tokens)
+
+
+async def logout_account(db: AsyncSession, raw_refresh_token: str) -> None:
+    """Revoke the supplied refresh token. Idempotent and silent on failure.
+
+    Always succeeds from the caller's perspective. If the token is unknown
+    or already revoked, this is a no-op (no error raised, no log emitted).
+    """
+    hashed_refresh_token = hash_refresh_token(raw_refresh_token)
+    refresh_token = await get_refresh_token_by_token_hash(db, hashed_refresh_token)
+
+    if refresh_token and refresh_token.revoked_at is None:
+        refresh_token.revoked_at = datetime.now(UTC)
+        logger.info("auth.logout.success", user_id=refresh_token.user_id)
 
 
 async def _issue_tokens(db: AsyncSession, user_id: int) -> IssuedTokens:
