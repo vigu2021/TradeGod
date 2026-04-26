@@ -2,9 +2,10 @@ from typing import Annotated, Final
 
 from fastapi import APIRouter, Cookie, Response
 
-from tradegod.core.dependencies import DbSession
+from tradegod.core.dependencies import CurrentUserId, DbSession
 from tradegod.core.exceptions import InvalidCredentials
 from tradegod.core.settings import Environment, get_settings
+from tradegod.crud.user import get_user
 from tradegod.schemas.auth import AccessToken, AuthResponse, LoginRequest, RegisterRequest
 from tradegod.schemas.user import UserPublic
 from tradegod.services.auth import login_account, logout_account, refresh_account, register_account
@@ -119,3 +120,16 @@ async def logout(
     if refresh_token:
         await logout_account(db, refresh_token)
     delete_refresh_cookie(response)
+
+
+@auth_router.get("/me")
+async def me(db: DbSession, user_id: CurrentUserId) -> UserPublic:
+    """Return the currently authenticated user.
+
+    Raises:
+        InvalidCredentials (401): missing or invalid access token.
+    """
+    user = await get_user(db, user_id)
+    if not user:
+        raise InvalidCredentials
+    return UserPublic.model_validate(user)

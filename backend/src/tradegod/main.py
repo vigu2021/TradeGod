@@ -12,6 +12,7 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from starlette.status import HTTP_422_UNPROCESSABLE_CONTENT
@@ -34,6 +35,13 @@ app = FastAPI(lifespan=lifespan)
 
 # Middlewares
 app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[get_settings().frontend_origin],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # Routers
