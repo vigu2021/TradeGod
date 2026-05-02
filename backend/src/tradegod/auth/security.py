@@ -9,7 +9,7 @@ from jwt import ExpiredSignatureError, InvalidTokenError
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
-from tradegod.core.exceptions import InvalidToken, TokenExpired
+from tradegod.auth.exceptions import InvalidToken, TokenExpired
 from tradegod.core.settings import get_settings
 
 ALGORITHM: Final[str] = "HS256"

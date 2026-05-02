@@ -43,27 +43,3 @@ class NotFoundError(AppError):
     status_code: int = 404
     code: ErrorCode = ErrorCode.NOT_FOUND
     detail: str = "Not found"
-
-
-class AlreadyExists(AppError):
-    status_code: int = 409
-    code: ErrorCode = ErrorCode.ALREADY_EXISTS
-    detail: str = "Already exists"
-
-
-class InvalidCredentials(AppError):
-    status_code: int = 401
-    code: ErrorCode = ErrorCode.INVALID_CREDENTIALS
-    detail: str = "Invalid credentials"
-
-
-class TokenExpired(AppError):
-    status_code: int = 401
-    code: ErrorCode = ErrorCode.TOKEN_EXPIRED
-    detail: str = "Token expired"
-
-
-class InvalidToken(AppError):
-    status_code: int = 401
-    code: ErrorCode = ErrorCode.INVALID_TOKEN
-    detail: str = "Invalid token"

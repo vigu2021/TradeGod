@@ -5,8 +5,9 @@ import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 from structlog.stdlib import BoundLogger
 
-from tradegod.core.exceptions import InvalidCredentials
-from tradegod.core.security import (
+from tradegod.auth.crud import create_refresh_token, get_refresh_token_by_token_hash, get_refresh_token_with_user_by_token_hash
+from tradegod.auth.exceptions import InvalidCredentials
+from tradegod.auth.security import (
     generate_access_token,
     generate_refresh_token,
     hash_password,
@@ -14,9 +15,8 @@ from tradegod.core.security import (
     verify_password,
 )
 from tradegod.core.settings import get_settings
-from tradegod.crud.refresh_token import create_refresh_token, get_refresh_token_by_token_hash, get_refresh_token_with_user_by_token_hash
-from tradegod.crud.user import create_user, get_user_by_email
-from tradegod.models import User
+from tradegod.users.crud import create_user, get_user_by_email
+from tradegod.users.models import User
 
 logger: BoundLogger = structlog.get_logger(__name__)
 

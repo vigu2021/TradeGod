@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import EmailStr
 
-from tradegod.schemas.base import PublicModel
+from tradegod.core.schemas import PublicModel
 
 
 class UserPublic(PublicModel):

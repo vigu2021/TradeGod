@@ -2,8 +2,8 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tradegod.core.exceptions import AlreadyExists
-from tradegod.models import User
+from tradegod.users.exceptions import AlreadyExists
+from tradegod.users.models import User
 
 
 async def get_user(db: AsyncSession, user_id: int) -> User | None:

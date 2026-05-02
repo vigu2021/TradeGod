@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from tradegod.models import RefreshToken
+from tradegod.auth.models import RefreshToken
 
 
 async def create_refresh_token(

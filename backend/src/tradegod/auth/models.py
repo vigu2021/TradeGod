@@ -3,7 +3,7 @@ from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from tradegod.core.database import Base
-from tradegod.models.user import User
+from tradegod.users.models import User
 
 
 class RefreshToken(Base):

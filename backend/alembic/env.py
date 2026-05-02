@@ -10,7 +10,8 @@ from alembic import context
 
 from tradegod.core.database import Base
 from tradegod.core.settings import get_settings
-from tradegod import models  # noqa: F401  # ensure all models register on Base.metadata
+from tradegod.users.models import User  # noqa: F401
+from tradegod.auth.models import RefreshToken  # noqa: F401
 
 config = context.config
 

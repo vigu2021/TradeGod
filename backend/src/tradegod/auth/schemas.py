@@ -1,7 +1,7 @@
 from pydantic import EmailStr, Field, SecretStr
 
-from tradegod.schemas.base import PublicModel
-from tradegod.schemas.user import UserPublic
+from tradegod.core.schemas import PublicModel
+from tradegod.users.schemas import UserPublic
 
 
 class RegisterRequest(PublicModel):

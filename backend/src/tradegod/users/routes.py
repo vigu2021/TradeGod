@@ -1,9 +1,10 @@
 from fastapi import APIRouter
 
-from tradegod.core.dependencies import CurrentUserId, DbSession
-from tradegod.core.exceptions import InvalidCredentials
-from tradegod.crud.user import get_user
-from tradegod.schemas.user import UserPublic
+from tradegod.auth.dependencies import CurrentUserId
+from tradegod.auth.exceptions import InvalidCredentials
+from tradegod.core.dependencies import DbSession
+from tradegod.users.crud import get_user
+from tradegod.users.schemas import UserPublic
 
 users_router = APIRouter(prefix="/users")
 

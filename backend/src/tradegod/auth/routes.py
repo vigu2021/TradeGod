@@ -2,12 +2,12 @@ from typing import Annotated, Final
 
 from fastapi import APIRouter, Cookie, Response
 
+from tradegod.auth.exceptions import InvalidCredentials
+from tradegod.auth.schemas import AccessToken, AuthResponse, LoginRequest, RegisterRequest
+from tradegod.auth.services import login_account, logout_account, refresh_account, register_account
 from tradegod.core.dependencies import DbSession
-from tradegod.core.exceptions import InvalidCredentials
 from tradegod.core.settings import Environment, get_settings
-from tradegod.schemas.auth import AccessToken, AuthResponse, LoginRequest, RegisterRequest
-from tradegod.schemas.user import UserPublic
-from tradegod.services.auth import login_account, logout_account, refresh_account, register_account
+from tradegod.users.schemas import UserPublic
 
 auth_router = APIRouter(prefix="/auth")
 
