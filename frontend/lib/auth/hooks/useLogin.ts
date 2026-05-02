@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { loginUser } from "../api";
 import { setAccessToken } from "../client";
-import { ApiError } from "@/lib/core/api-error";
+import { ApiError } from "@/lib/core/error/api-error";
 import type { AuthResponse } from "../types";
 import type { LoginRequest } from "../schemas";
 

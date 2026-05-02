@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type RegisterRequest, registerSchema } from "@/lib/auth/schemas";
 import { useRegister } from "../hooks/useRegister";
-import { messageFor } from "@/lib/core/error-messages";
+import { messageFor } from "@/lib/core/error/messages";
 
 export const RegisterForm = () => {
   const {

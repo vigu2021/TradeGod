@@ -1,6 +1,6 @@
 import axios, { AxiosError } from "axios";
 import { env } from "@/lib/core/env";
-import { ApiError } from "@/lib/core/api-error";
+import { ApiError } from "@/lib/core/error/api-error";
 
 // globalToken state
 let accessToken: string | null = null;
