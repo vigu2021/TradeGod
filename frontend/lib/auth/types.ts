@@ -1,4 +1,4 @@
-import type { User } from "@/types/user";
+import type { User } from "@/lib/users/types";
 
 export type AccessToken = {
   accessToken: string;

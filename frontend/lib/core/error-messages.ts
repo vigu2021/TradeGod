@@ -1,4 +1,4 @@
-import type { ErrorCode } from "@/types/errors";
+import type { ErrorCode } from "@/lib/core/error-codes";
 
 const ERROR_MESSAGES = {
   internal_error: "Something went wrong. Please try again.",
