@@ -206,3 +206,11 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 CLAUDE.md
+
+# Stray Node files at repo root (real Node project lives in frontend/)
+/node_modules/
+/package.json
+/package-lock.json
+
+# Planning artifacts (personal scratch)
+/.plans/
