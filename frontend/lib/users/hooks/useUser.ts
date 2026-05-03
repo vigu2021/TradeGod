@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ApiError } from "@/lib/core/error/api-error";
 import { getUser } from "../api";
 import { User } from "../types";

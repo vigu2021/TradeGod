@@ -7,6 +7,7 @@ const ERROR_MESSAGES = {
   method_not_allowed: "Action not allowed.",
   already_exists: "That account already exists.",
   unauthenticated: "Please log in.",
+  forbidden: "You don't have permission for that.",
   invalid_credentials: "Invalid email or password.",
   token_expired: "Your session expired. Please log in again.",
   invalid_token: "Your session is invalid. Please log in again.",

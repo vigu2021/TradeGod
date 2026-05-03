@@ -22,6 +22,7 @@ logger: BoundLogger = structlog.get_logger(__name__)
 # Anything not listed falls back to INTERNAL_ERROR.
 _HTTP_STATUS_TO_CODE: dict[int, ErrorCode] = {
     401: ErrorCode.UNAUTHENTICATED,
+    403: ErrorCode.FORBIDDEN,
     404: ErrorCode.NOT_FOUND,
     405: ErrorCode.METHOD_NOT_ALLOWED,
 }

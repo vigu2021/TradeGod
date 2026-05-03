@@ -5,6 +5,7 @@ export const ERROR_CODES = {
   METHOD_NOT_ALLOWED: "method_not_allowed",
   ALREADY_EXISTS: "already_exists",
   UNAUTHENTICATED: "unauthenticated",
+  FORBIDDEN: "forbidden",
   INVALID_CREDENTIALS: "invalid_credentials",
   TOKEN_EXPIRED: "token_expired",
   INVALID_TOKEN: "invalid_token",
