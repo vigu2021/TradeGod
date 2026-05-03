@@ -16,7 +16,7 @@ REFRESH_COOKIE_NAME: Final[str] = "refresh_token"
 
 
 def set_refresh_cookie(response: Response, raw_refresh_token: str) -> None:
-    """Attach the refresh token as an HttpOnly cookie scoped to /auth."""
+    """Attach the refresh token as an HttpOnly cookie."""
     response.set_cookie(
         key=REFRESH_COOKIE_NAME,
         value=raw_refresh_token,
@@ -24,7 +24,7 @@ def set_refresh_cookie(response: Response, raw_refresh_token: str) -> None:
         httponly=True,
         secure=get_settings().environment != Environment.DEV,
         samesite="lax",
-        path="/auth",
+        path="/",
     )
 
 
@@ -35,7 +35,7 @@ def delete_refresh_cookie(response: Response) -> None:
         httponly=True,
         secure=get_settings().environment != Environment.DEV,
         samesite="lax",
-        path="/auth",
+        path="/",
     )
 
 

@@ -2,10 +2,8 @@ import axios, { AxiosError } from "axios";
 import { env } from "@/lib/core/env";
 import { ApiError } from "@/lib/core/error/api-error";
 
-// globalToken state
 let accessToken: string | null = null;
 
-// Actions, should be reserved for only auth actions
 export const setAccessToken = (token: string | null) => {
   accessToken = token;
 };
@@ -16,7 +14,7 @@ type ApiErrorPayload = {
   detail?: string;
 };
 
-export const authApi = axios.create({
+export const apiClient = axios.create({
   baseURL: env.apiUrl,
   timeout: 5000,
   withCredentials: true,
@@ -26,7 +24,7 @@ export const authApi = axios.create({
   },
 });
 
-authApi.interceptors.response.use(
+apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ApiErrorPayload>) => {
     if (error.response) {
