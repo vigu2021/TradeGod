@@ -5,14 +5,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { type RegisterRequest, registerSchema } from "@/lib/auth/schemas";
 import { useRegister } from "../hooks/useRegister";
 import { messageFor } from "@/lib/core/error/messages";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 export const RegisterForm = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors: fieldError, isSubmitting },
-  } = useForm<RegisterRequest>({
+  const form = useForm<RegisterRequest>({
     resolver: zodResolver(registerSchema),
+    defaultValues: { username: "", email: "", password: "" },
   });
   const { mutate, isPending, error: submitError } = useRegister();
 
@@ -21,24 +21,65 @@ export const RegisterForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <label htmlFor="username">Username</label>
-      <input id="username" {...register("username")} placeholder="Type your username here..." />
-      {fieldError.username && <span>{fieldError.username.message}</span>}
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="bg-card w-full max-w-md space-y-8 rounded-xl border p-10 shadow-sm"
+      >
+        <div className="space-y-2 text-center">
+          <h1 className="text-3xl font-semibold tracking-tight">Create an account</h1>
+          <p className="text-muted-foreground text-base">Enter your details to get started.</p>
+        </div>
 
-      <label htmlFor="email">Email</label>
-      <input id="email" {...register("email")} placeholder="Type your email here..." />
-      {fieldError.email && <span>{fieldError.email.message}</span>}
+        <div className="space-y-5">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base">Username</FormLabel>
+                <FormControl>
+                  <Input placeholder="yourname" className="h-12 text-base" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base">Email</FormLabel>
+                <FormControl>
+                  <Input type="email" placeholder="you@example.com" className="h-12 text-base" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base">Password</FormLabel>
+                <FormControl>
+                  <Input type="password" placeholder="At least 8 characters" className="h-12 text-base" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-      <label htmlFor="password">Password</label>
-      <input id="password" {...register("password")} placeholder="Type your password here..." />
-      {fieldError.password && <span>{fieldError.password.message}</span>}
-
-      <button type="submit" disabled={isPending}>
-        {isPending ? "Registering..." : "Register"}
-      </button>
-
-      {submitError && messageFor(submitError.code)}
-    </form>
+        <div className="space-y-3">
+          <Button type="submit" disabled={isPending} size="lg" className="h-12 w-full text-base">
+            {isPending ? "Creating account..." : "Create account"}
+          </Button>
+          {submitError && <p className="text-destructive text-center text-sm">{messageFor(submitError.code)}</p>}
+        </div>
+      </form>
+    </Form>
   );
 };
