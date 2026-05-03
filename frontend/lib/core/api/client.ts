@@ -24,6 +24,16 @@ export const apiClient = axios.create({
   },
 });
 
+// Attach accessToken to every request
+apiClient.interceptors.request.use((config) => {
+  const accessToken = getAccessToken();
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
+  return config;
+});
+
+// Wrap api calls to the backend with custom ApiError.
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ApiErrorPayload>) => {
