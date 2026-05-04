@@ -1,6 +1,7 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { env } from "@/lib/core/env";
 import { ApiError } from "@/lib/core/error/api-error";
+import { ERROR_CODES } from "../error/codes";
 
 let accessToken: string | null = null;
 
@@ -8,10 +9,9 @@ export const setAccessToken = (token: string | null) => {
   accessToken = token;
 };
 export const getAccessToken = () => accessToken;
-
-type ApiErrorPayload = {
-  code: string;
-  detail?: string;
+type ApiErrorPayload = { code: string; detail?: string };
+type RetriableRequestConfig = InternalAxiosRequestConfig & {
+  _retry?: boolean;
 };
 
 export const apiClient = axios.create({
@@ -33,18 +33,44 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Wrap api calls to the backend with custom ApiError.
+// bare axios so a 401 from /refresh doesn't loop back through this interceptor
+const refreshAccessToken = async (): Promise<string> => {
+  const { data } = await axios.post<{ tokens: { access_token: string } }>(`${env.apiUrl}/auth/refresh`, null, {
+    withCredentials: true,
+  });
+  return data.tokens.access_token;
+};
+
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<ApiErrorPayload>) => {
-    if (error.response) {
-      throw new ApiError(
-        error.response.data?.code ?? "internal_error",
-        error.response.status,
-        error.response.data?.detail,
-      );
+  async (error: AxiosError<ApiErrorPayload>) => {
+    if (!error.response) {
+      throw new ApiError("internal_error", 0, error.message);
     }
-    // network error, timeout, no response
-    throw new ApiError("internal_error", 0, error.message);
+
+    const errorCode = error.response.data?.code ?? "internal_error";
+    const status = error.response.status;
+    const detail = error.response.data?.detail;
+    const originalRequest = error.config as RetriableRequestConfig | undefined;
+
+    if (!originalRequest) {
+      throw new ApiError(errorCode, status, detail);
+    }
+
+    if (errorCode === ERROR_CODES.TOKEN_EXPIRED && !originalRequest._retry) {
+      originalRequest._retry = true;
+      try {
+        const newToken = await refreshAccessToken();
+        setAccessToken(newToken);
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return apiClient(originalRequest);
+      } catch {
+        // refresh dead, drop the token and let the auth guard kick them to login
+        setAccessToken(null);
+        throw new ApiError(ERROR_CODES.UNAUTHENTICATED, 401, "Session expired");
+      }
+    }
+
+    throw new ApiError(errorCode, status, detail);
   },
 );

@@ -214,3 +214,6 @@ CLAUDE.md
 
 # Planning artifacts (personal scratch)
 /.plans/
+
+# Dooing nvim plugin per-project todos
+dooing.json
