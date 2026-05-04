@@ -2,6 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { env } from "@/lib/core/env";
 import { ApiError } from "@/lib/core/error/api-error";
 import { ERROR_CODES } from "../error/codes";
+import type { AccessToken } from "@/lib/auth/types";
 
 let accessToken: string | null = null;
 
@@ -33,12 +34,12 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// bare axios so a 401 from /refresh doesn't loop back through this interceptor
+// Bare axios so a 401 from /refresh doesn't loop back through this interceptor
 const refreshAccessToken = async (): Promise<string> => {
-  const { data } = await axios.post<{ tokens: { access_token: string } }>(`${env.apiUrl}/auth/refresh`, null, {
+  const { data } = await axios.post<{ tokens: AccessToken }>(`${env.apiUrl}/auth/refresh`, null, {
     withCredentials: true,
   });
-  return data.tokens.access_token;
+  return data.tokens.accessToken;
 };
 
 apiClient.interceptors.response.use(
@@ -57,7 +58,7 @@ apiClient.interceptors.response.use(
       throw new ApiError(errorCode, status, detail);
     }
 
-    if (errorCode === ERROR_CODES.TOKEN_EXPIRED && !originalRequest._retry) {
+    if (status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
         const newToken = await refreshAccessToken();
@@ -65,8 +66,9 @@ apiClient.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return apiClient(originalRequest);
       } catch {
-        // refresh dead, drop the token and let the auth guard kick them to login
+        // refresh dead, drop the token and clear the stale cookie so the proxy stops bouncing /login back to /
         setAccessToken(null);
+        await axios.post(`${env.apiUrl}/auth/logout`, null, { withCredentials: true }).catch(() => {});
         throw new ApiError(ERROR_CODES.UNAUTHENTICATED, 401, "Session expired");
       }
     }

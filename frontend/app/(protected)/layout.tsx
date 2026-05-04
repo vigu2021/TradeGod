@@ -4,7 +4,7 @@ import { useUser } from "@/lib/users/hooks/useUser";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export function AuthGuard({ children }: { children: React.ReactNode }) {
+export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { data: user, isLoading, isError } = useUser();
 

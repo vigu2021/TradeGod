@@ -27,7 +27,7 @@ export const LoginForm = () => {
         className="bg-card w-full max-w-md space-y-8 rounded-xl border p-10 shadow-sm"
       >
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-semibold tracking-tight">Create an account</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Login</h1>
           <p className="text-muted-foreground text-base">Enter your details to get started.</p>
         </div>
 
