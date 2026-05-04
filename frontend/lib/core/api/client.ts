@@ -58,7 +58,10 @@ apiClient.interceptors.response.use(
       throw new ApiError(errorCode, status, detail);
     }
 
-    if (status === 401 && !originalRequest._retry) {
+    // 401s from the auth endpoints themselves mean wrong credentials, not an expired session, so let them through
+    const isAuthEndpoint = originalRequest.url?.startsWith("/auth/");
+
+    if (status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       originalRequest._retry = true;
       try {
         const newToken = await refreshAccessToken();
@@ -66,7 +69,7 @@ apiClient.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return apiClient(originalRequest);
       } catch {
-        // refresh dead, drop the token and clear the stale cookie so the proxy stops bouncing /login back to /
+        // refresh dead, drop the token and clear the stale cookie
         setAccessToken(null);
         await axios.post(`${env.apiUrl}/auth/logout`, null, { withCredentials: true }).catch(() => {});
         throw new ApiError(ERROR_CODES.UNAUTHENTICATED, 401, "Session expired");

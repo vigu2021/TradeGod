@@ -1,24 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const AUTH_ROUTES = new Set(["/login", "/register"]);
+const PUBLIC_ROUTES = new Set(["/login", "/register", "/"]);
 
 export function proxy(request: NextRequest) {
-  const refreshToken = request.cookies.has("refresh_token");
-  const isAuthRoute = AUTH_ROUTES.has(request.nextUrl.pathname);
+  const path = request.nextUrl.pathname;
+  if (PUBLIC_ROUTES.has(path)) return NextResponse.next();
 
-  // Logged in users should not see the auth routes, redirect them
-  if (refreshToken && isAuthRoute) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  // Public auth routes allowed for logged out users
-  if (isAuthRoute) {
-    return NextResponse.next();
-  }
-
-  // Everything else requires auth
-  if (!refreshToken) {
+  if (!request.cookies.has("refresh_token")) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

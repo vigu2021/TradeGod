@@ -8,8 +8,10 @@ import { messageFor } from "@/lib/core/error/messages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useRouter } from "next/navigation";
 
 export const RegisterForm = () => {
+  const router = useRouter();
   const form = useForm<RegisterRequest>({
     resolver: zodResolver(registerSchema),
     defaultValues: { username: "", email: "", password: "" },
@@ -17,7 +19,9 @@ export const RegisterForm = () => {
   const { mutate, isPending, error: submitError } = useRegister();
 
   const onSubmit = (data: RegisterRequest) => {
-    mutate(data);
+    mutate(data, {
+      onSuccess: () => router.push("/dashboard"),
+    });
   };
 
   return (

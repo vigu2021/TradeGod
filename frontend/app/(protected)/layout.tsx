@@ -1,5 +1,6 @@
 "use client";
 
+import { Navbar } from "@/components/Navbar";
 import { useUser } from "@/lib/users/hooks/useUser";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -22,5 +23,10 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     return null;
   }
 
-  return children;
+  return (
+    <>
+      <Navbar />
+      children
+    </>
+  );
 }
