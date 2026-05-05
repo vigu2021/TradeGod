@@ -26,7 +26,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   return (
     <>
       <Navbar />
-      children
+      {children}
     </>
   );
 }

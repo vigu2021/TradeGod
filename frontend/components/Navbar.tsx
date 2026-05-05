@@ -26,23 +26,28 @@ export function Navbar() {
   };
 
   return (
-    <nav className="bg-background sticky top-0 z-40 border-b">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-6 px-6">
-        <Link href="/dashboard" className="text-lg font-semibold tracking-tight">
-          TradeGod
+    <nav className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-14 items-center gap-8 px-6">
+        <Link href="/dashboard" className="group flex items-center gap-2.5">
+          <div className="bg-foreground text-background flex h-7 w-7 items-center justify-center rounded-md text-sm font-bold tracking-tight">
+            T
+          </div>
+          <span className="text-[15px] font-semibold tracking-tight transition-opacity group-hover:opacity-70">
+            TradeGod
+          </span>
         </Link>
 
-        <div className="flex flex-1 items-center justify-center gap-1">
+        <div className="flex items-center gap-1">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`rounded-md px-3 py-2 text-sm transition-colors ${
+                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                   isActive
-                    ? "bg-accent text-accent-foreground font-medium"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                    ? "bg-muted text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                 }`}
               >
                 {item.label}
@@ -51,10 +56,27 @@ export function Navbar() {
           })}
         </div>
 
-        <div className="flex items-center gap-3">
-          {user && <span className="text-muted-foreground hidden text-sm sm:inline">{user.username}</span>}
-          <Button onClick={handleLogout} disabled={isPending} variant="outline" size="sm">
-            {isPending ? "Logging out..." : "Log out"}
+        <div className="ml-auto flex items-center gap-3">
+          {user && (
+            <div className="hidden items-center gap-2.5 sm:flex">
+              <div className="from-foreground to-foreground/70 text-background flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br text-xs font-semibold uppercase">
+                {user.username.charAt(0)}
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="text-foreground text-sm font-medium">{user.username}</span>
+                <span className="text-muted-foreground text-[11px]">{user.email}</span>
+              </div>
+            </div>
+          )}
+          <div className="bg-border mx-1 hidden h-6 w-px sm:block" />
+          <Button
+            onClick={handleLogout}
+            disabled={isPending}
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            {isPending ? "..." : "Log out"}
           </Button>
         </div>
       </div>
