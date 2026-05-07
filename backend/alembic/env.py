@@ -12,6 +12,7 @@ from tradegod.core.database import Base
 from tradegod.core.settings import get_settings
 from tradegod.users.models import User  # noqa: F401
 from tradegod.auth.models import RefreshToken  # noqa: F401
+from tradegod.balances.models.asset import Asset  # noqa: F401
 
 config = context.config
 
