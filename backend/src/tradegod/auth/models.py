@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -16,4 +17,4 @@ class RefreshToken(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    user: Mapped["User"] = relationship(lazy = "raise")
+    user: Mapped[User] = relationship(lazy="raise")

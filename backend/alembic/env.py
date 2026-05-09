@@ -7,12 +7,11 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-
+from tradegod.auth.models import RefreshToken  # noqa: F401
 from tradegod.core.database import Base
 from tradegod.core.settings import get_settings
+from tradegod.ledger.models import Account, AccountHolding, Asset  # noqa: F401
 from tradegod.users.models import User  # noqa: F401
-from tradegod.auth.models import RefreshToken  # noqa: F401
-from tradegod.balances.models import Asset, Account  # noqa: F401
 
 config = context.config
 
