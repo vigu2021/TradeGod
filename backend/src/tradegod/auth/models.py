@@ -16,4 +16,4 @@ class RefreshToken(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    user: Mapped["User"] = relationship()
+    user: Mapped["User"] = relationship(lazy = "raise")
