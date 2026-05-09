@@ -10,7 +10,7 @@ from alembic import context
 from tradegod.auth.models import RefreshToken  # noqa: F401
 from tradegod.core.database import Base
 from tradegod.core.settings import get_settings
-from tradegod.ledger.models import Account, AccountHolding, Asset  # noqa: F401
+from tradegod.ledger.models import Account, AccountHolding, Asset, Transaction, TransactionEntry  # noqa: F401
 from tradegod.users.models import User  # noqa: F401
 
 config = context.config
