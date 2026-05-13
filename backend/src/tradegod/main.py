@@ -3,6 +3,7 @@
 from tradegod.core.logging_config import setup_logging
 from tradegod.core.middlewares.request_logging import RequestLoggingMiddleware
 from tradegod.auth.routes import auth_router
+from tradegod.ledger.routes import ledger_router
 from tradegod.users.routes import users_router
 
 setup_logging()
@@ -52,6 +53,7 @@ app.add_middleware(
 # Routers
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(ledger_router)
 
 
 # Error handlers

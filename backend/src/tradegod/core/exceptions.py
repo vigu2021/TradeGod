@@ -44,3 +44,9 @@ class NotFoundError(AppError):
     status_code: int = 404
     code: ErrorCode = ErrorCode.NOT_FOUND
     detail: str = "Not found"
+
+
+class AlreadyExists(AppError):
+    status_code: int = 409
+    code: ErrorCode = ErrorCode.ALREADY_EXISTS
+    detail: str = "Already exists"
