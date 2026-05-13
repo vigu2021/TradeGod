@@ -6,7 +6,14 @@ from tradegod.core.exceptions import AlreadyExists, NotFoundError
 from tradegod.ledger.models import Account, AccountType
 
 
-async def create_account(db: AsyncSession, user_id: int, account_type: AccountType, name: str, provider: str | None) -> Account:
+async def create_account(
+    db: AsyncSession,
+    *,
+    user_id: int,
+    account_type: AccountType,
+    name: str,
+    provider: str | None,
+) -> Account:
     """Insert a new account and flush so uniqueness constraints fire immediately.
 
     Transaction lifecycle (commit/rollback) is owned by the session dependency.
