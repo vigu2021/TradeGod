@@ -1,17 +1,17 @@
-import { apiClient } from "@/lib/core/api/client";
-import type { AuthResponse } from "@/lib/auth/types";
-import type { LoginRequest, RegisterRequest } from "@/lib/auth/schemas";
+import { apiClient } from "../core/api/client";
+import { AccountCreateRequest } from "./schemas";
+import { Account } from "./types";
 
-export const registerUser = async (payload: RegisterRequest): Promise<AuthResponse> => {
-  const response = await apiClient.post<AuthResponse>("/auth/register", payload);
+export const listAccounts = async () => {
+  const response = await apiClient.get<Account[]>("/accounts");
   return response.data;
 };
 
-export const loginUser = async (payload: LoginRequest): Promise<AuthResponse> => {
-  const response = await apiClient.post<AuthResponse>("/auth/login", payload);
+export const createAccount = async (payload: AccountCreateRequest) => {
+  const response = await apiClient.post<Account>("/accounts", payload);
   return response.data;
 };
 
-export const logoutUser = async (): Promise<void> => {
-  await apiClient.post("/auth/logout");
+export const archiveAccount = async (accountId: number) => {
+  await apiClient.post(`/accounts/${accountId}/archive`);
 };

@@ -8,9 +8,9 @@ export enum AccountType {
 
 export type Account = {
   id: number;
-  account_type: AccountType;
+  accountType: AccountType;
   name: string;
   provider: string | null;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 };
