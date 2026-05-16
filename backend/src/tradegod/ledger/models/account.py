@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, UniqueConstraint, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Index, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from tradegod.core.database import Base, sql_enum
@@ -18,7 +18,16 @@ class AccountType(StrEnum):
 
 class Account(Base):
     __tablename__ = "accounts"
-    __table_args__ = (UniqueConstraint("user_id", "name"),)
+    # active accounts must have unique (user_id, name); archived rows ignored so names can be reused
+    __table_args__ = (
+        Index(
+            "uq_account_user_name_active",
+            "user_id",
+            "name",
+            unique=True,
+            postgresql_where=text("NOT is_archived"),
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)

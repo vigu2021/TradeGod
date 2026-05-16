@@ -102,3 +102,25 @@ async def test_archive_account_other_user_raises(db_session: AsyncSession, accou
     second = await build_user(db_session, username="other3", email="other3@example.com")
     with pytest.raises(NotFoundError):
         await archive_account(db_session, second.id, account.id)
+
+
+async def test_create_account_reuses_archived_name(db_session: AsyncSession, user: User) -> None:
+    # partial unique index ignores archived rows so users can recycle the same name
+    original = await create_account(
+        db_session,
+        user_id=user.id,
+        account_type=AccountType.CASH,
+        name="Main",
+        provider=None,
+    )
+    await archive_account(db_session, user_id=user.id, account_id=original.id)
+
+    fresh = await create_account(
+        db_session,
+        user_id=user.id,
+        account_type=AccountType.CASH,
+        name="Main",
+        provider=None,
+    )
+    assert fresh.id != original.id
+    assert fresh.is_archived is False
