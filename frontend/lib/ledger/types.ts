@@ -6,6 +6,14 @@ export enum AccountType {
   WALLET = "wallet",
 }
 
+export const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
+  [AccountType.CASH]: "Cash",
+  [AccountType.BANK]: "Bank",
+  [AccountType.BROKERAGE]: "Brokerage",
+  [AccountType.CRYPTO_EXCHANGE]: "Crypto exchange",
+  [AccountType.WALLET]: "Wallet",
+};
+
 export type Account = {
   id: number;
   accountType: AccountType;
