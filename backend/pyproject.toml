@@ -61,6 +61,7 @@ dev = [
     "pytest-cov>=6.0",
     "pytest-mock>=3.14",
     "ruff>=0.15.10",
+    "time-machine>=2.16",
 ]
 
 [tool.pytest.ini_options]
