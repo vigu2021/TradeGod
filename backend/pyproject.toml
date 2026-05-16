@@ -46,7 +46,47 @@ line-length = 140
 dev = [
     "alembic>=1.18.4",
     "basedpyright>=1.39.0",
+    "dirty-equals>=0.9",
+    "httpx>=0.28",
+    "python-dotenv>=1.0",
     "pre-commit>=4.0.0",
     "pytest>=9.0.3",
+    "pytest-asyncio>=1.0",
+    "pytest-cov>=6.0",
+    "pytest-mock>=3.14",
     "ruff>=0.15.10",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["tests"]
+filterwarnings = ["error"]
+addopts = "--strict-markers --strict-config --tb=short"
+markers = [
+    "unit: pure unit tests, no DB/app",
+    "integration: hits FastAPI app via httpx",
+    "slow: opt-in via -m slow",
+]
+
+[tool.coverage.run]
+source = ["src/tradegod"]
+branch = true
+concurrency = ["thread", "greenlet"]
+omit = [
+    "src/tradegod/main.py",
+    "src/tradegod/core/logging_config.py",
+    "src/tradegod/**/__init__.py",
+    "alembic/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 100
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "\\.\\.\\.",
 ]
