@@ -28,13 +28,19 @@ tradegod = "tradegod.main:main"
 venvPath = "."
 venv = ".venv"
 pythonVersion = "3.13"
-include = ["src"]
-extraPaths = ["src"]
+include = ["src", "tests"]
+extraPaths = ["src", "."]
 reportUnknownMemberType = false
 reportUnknownVariableType = false
 reportUnknownArgumentType = false
 reportUnannotatedClassAttribute = false
 reportAny = false
+
+# pytest fixtures and event listeners are referenced by decorators, not callers,
+# so reportUnusedFunction trips on every fixture/listener in tests/
+[[tool.pyright.executionEnvironments]]
+root = "tests"
+reportUnusedFunction = false
 
 [tool.ruff]
 line-length = 140
@@ -62,7 +68,11 @@ asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "session"
 asyncio_default_test_loop_scope = "session"
 testpaths = ["tests"]
-filterwarnings = ["error"]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:asyncpg.*",
+    "ignore::DeprecationWarning:sqlalchemy.*",
+]
 addopts = "--strict-markers --strict-config --tb=short"
 markers = [
     "unit: pure unit tests, no DB/app",

@@ -38,10 +38,6 @@ def _migrated_db() -> None:
     command.upgrade(config, "head")
 
 
-# referenced so basedpyright sees the autouse fixture as used
-_migrated_db_fixture = _migrated_db
-
-
 @pytest_asyncio.fixture
 async def db_session(test_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
     async with test_engine.connect() as connection:
@@ -59,13 +55,9 @@ async def db_session(test_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, N
             if transaction_state.nested and parent is not None and not parent.nested:
                 _ = sync_session.begin_nested()
 
-        # listener registration is the side effect; bind to silence unused-function
-        _restart_savepoint_ref = restart_savepoint
-
         try:
             yield session
         finally:
-            del _restart_savepoint_ref
             await session.close()
             await transaction.rollback()
 
@@ -93,7 +85,11 @@ async def authed_client(
     db_session: AsyncSession,
 ) -> AsyncGenerator[tuple[AsyncClient, User], None]:
     user = await build_user(db_session)
-    app.dependency_overrides[get_current_user_id] = lambda: user.id
+
+    def override_user_id() -> int:
+        return user.id
+
+    app.dependency_overrides[get_current_user_id] = override_user_id
     try:
         yield client, user
     finally:

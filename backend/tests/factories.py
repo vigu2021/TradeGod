@@ -1,9 +1,3 @@
-"""Async factories for building domain objects in tests.
-
-Each factory persists via `session.flush()` (not commit) so the outer
-SAVEPOINT-based test transaction stays intact and can be rolled back.
-"""
-
 import uuid
 from datetime import UTC, datetime, timedelta
 
@@ -20,7 +14,7 @@ from tradegod.users.models import User
 
 
 def _short_id() -> str:
-    return uuid.uuid4().hex[:8]
+    return uuid.uuid4().hex[:12]
 
 
 async def build_user(
@@ -30,17 +24,7 @@ async def build_user(
     email: str | None = None,
     password: str = "testpass123",
 ) -> User:
-    """Persist a User with real argon2-hashed password.
-
-    Args:
-        session: Active async session inside the test transaction.
-        username: Override username, else random unique value.
-        email: Override email, else random unique value.
-        password: Plaintext password to hash via real argon2.
-
-    Returns:
-        The flushed User with id populated.
-    """
+    # real argon2: no monkeypatching
     suffix = _short_id()
     user = User(
         username=username or f"user_{suffix}",
@@ -48,7 +32,7 @@ async def build_user(
         hashed_password=await hash_password(password),
     )
     session.add(user)
-    # flush not commit: keeps the SAVEPOINT chain alive for rollback
+    # flush not commit: keeps SAVEPOINT chain alive for rollback
     await session.flush()
     return user
 
@@ -59,20 +43,8 @@ async def build_account(
     *,
     name: str | None = None,
     account_type: AccountType = AccountType.CASH,
-    provider: str | None = "test",
+    provider: str | None = None,
 ) -> Account:
-    """Persist an Account for the given user.
-
-    Args:
-        session: Active async session inside the test transaction.
-        user_id: Owning user id.
-        name: Override account name, else random unique value.
-        account_type: AccountType enum value.
-        provider: Optional provider string.
-
-    Returns:
-        The flushed Account with id populated.
-    """
     account = Account(
         user_id=user_id,
         name=name or f"account_{_short_id()}",
@@ -91,19 +63,7 @@ async def build_refresh_token(
     expired: bool = False,
     revoked: bool = False,
 ) -> tuple[RefreshToken, str]:
-    """Persist a RefreshToken row in the requested state.
-
-    Args:
-        session: Active async session inside the test transaction.
-        user_id: Owning user id.
-        expired: If True, expires_at is set in the past.
-        revoked: If True, revoked_at is set in the past.
-
-    Returns:
-        Tuple of the flushed RefreshToken row and the plaintext token string
-        (only the hash is persisted; plaintext is needed by callers that
-        simulate the refresh flow over HTTP).
-    """
+    # returns (row, plaintext) so callers can simulate the http refresh flow
     now = datetime.now(UTC)
     expires_at = now - timedelta(days=1) if expired else now + timedelta(days=7)
     revoked_at = now - timedelta(hours=1) if revoked else None
