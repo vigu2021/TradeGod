@@ -10,6 +10,7 @@ from tradegod.auth.security import (
     hash_refresh_token,
 )
 from tradegod.ledger.models.account import Account, AccountType
+from tradegod.ledger.models.asset import Asset, AssetType
 from tradegod.users.models import User
 
 
@@ -54,6 +55,24 @@ async def build_account(
     session.add(account)
     await session.flush()
     return account
+
+
+async def build_asset(
+    session: AsyncSession,
+    *,
+    symbol: str | None = None,
+    name: str | None = None,
+    asset_type: AssetType = AssetType.STOCK,
+) -> Asset:
+    suffix = _short_id()
+    asset = Asset(
+        asset_type=asset_type,
+        symbol=symbol or f"SYM_{suffix}".upper()[:20],
+        name=name or f"asset_{suffix}",
+    )
+    session.add(asset)
+    await session.flush()
+    return asset
 
 
 async def build_refresh_token(
